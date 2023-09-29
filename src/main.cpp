@@ -48,24 +48,45 @@ long mainTimer;
  */
 void playBuzzer()
 {
-  int randomNumber = random(4);  // Random number 0 to 3
+  int songSelection = 0;//random(4);  // Random number 0 to 3
+  int* melody;
+  float* rhythm;
+  int bpm;
+  int size;
 
-  if (randomNumber == 0) { // 1/3 chance that Stereo Love plays
-      int size = sizeof(betterOffAloneMelody) / sizeof(int);
-      playSong(BUZZER, betterOffAloneMelody, betterOffAloneRhythm, size, betterOffAloneBPM);
-      //int size = sizeof(stereoLoveMelody) / sizeof(int);
-      //playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
-  }
-  else {  // Play amongus
-    if (random(1, 20) == 1) {   // 1/20 change that rere plays
+  switch (songSelection)
+  {
+    case MOGUSTGUTUS:
       int size = sizeof(susMogiusgtusMelody) / sizeof(int);
-      playSong(BUZZER, rereSusMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
-    }
-    else {
-      int size = sizeof(susMogiusgtusMelody) / sizeof(int);
-      playSong(BUZZER, susMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
-    }
+      melody = susMogiusgtusMelody;
+      rhythm = susMogiusgtusRhythm;
+      bpm = susMogiusgtusBPM;
+      // int mogustusRere = random(1,20) == 1;  // 1/20 change that rere plays
+      // if (mogustusRere) {
+      //   int size = sizeof(susMogiusgtusMelody) / sizeof(int);
+      //   playSong(BUZZER, rereSusMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
+      // }
+      // else {
+      //   int size = sizeof(susMogiusgtusMelody) / sizeof(int);
+      //   playSong(BUZZER, susMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
+      // }
+      break;
+    
+    case STEREO_LOVE:
+        int size = sizeof(stereoLoveBPM) / sizeof(int);
+        playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
+      break;
+
+    case BETTER_OFF_ALONE:
+        int size = sizeof(betterOffAloneMelody) / sizeof(int);
+        playSong(BUZZER, betterOffAloneMelody, betterOffAloneRhythm, size, betterOffAloneBPM);
+      break;
+
+    default:
+      break;
   }
+
+  playSong(BUZZER, melody, rhythm, size, bpm);
 }
 
 // ---------------------- STATE MACHINES ---------------------------

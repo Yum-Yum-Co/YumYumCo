@@ -1,4 +1,10 @@
 #include <./piezo-music.h>
+
+// ------------------ SONG CONSTANTS --------------------
+#define MOGUSTGUTUS 0
+#define STEREO_LOVE 1
+#define BETTER_OFF_ALONE 2
+
 // ------------------ SONG BANK -------------------------
 int susMogiusgtusBPM = 30;
 int susMogiusgtusMelody[] = {
@@ -20,6 +26,7 @@ float susMogiusgtusRhythm[] = {
     8,
     8, 4};
 
+
 int stereoLoveBPM = 40;
 int stereoLoveMelody[] = {
     GS4, PAUSE, E5, PAUSE, E5, DS5, E5, FS5, E5,
@@ -27,6 +34,7 @@ int stereoLoveMelody[] = {
 float stereoLoveRhythm[] = {
     8, 16, 6, 16, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 2};
+
 
 int betterOffAloneBPM = 46;
 int betterOffAloneMelody[] = {
