@@ -4,7 +4,7 @@
 // -------------------- PINS -----------------
 #define CAR_POWER_PIN 12
 #define AC_POWER_SWITCH_PIN 5
-#define BUZZER 9
+#define BUZZER 3
 #define AC_RELAY_PIN 13
 
 // ------------------ STATE CONSTANTS -----------------
@@ -12,7 +12,8 @@
 #define SWITCH_CONFIRM 1
 #define SWITCH_CHANGE 2
 #define AC_RELAY_INVERT 3
-#define AC_ON 1
+#define AC_ON_LONG 1
+#define AC_ON_SHORT 11
 #define AC_OFF 2
 #define CLEANUP 10
 #define CAR_OFF 0
@@ -21,13 +22,16 @@
 // ----------------- CONSTANTS --------------------
 #define LOOP_TIME 0
 #define ONE_SECOND 1000
-#define ONE_MINUTE 60000 // 60,000 milliseconds = one minute
+#define ONE_MINUTE 60000    // 60,000 milliseconds = one minute
+#define AC_ON_TIME_SHORT 3.5  // On time (minutes)
+#define AC_ON_TIME_LONG 7.5 // On time (minutes)
+#define AC_OFF_TIME 0.5     // Off time (minutes)
 
 // ------------------ STATE VARIABLES ----------------
 int carState;     // the state of the Car's power
 int stateAC;      // the state of the AC State Machine
 int timerACState; // the state of the AC Timer State Machine
-bool powerAC;     // keeps track of the state of the A/C power (on / off)
+bool switchAC;     // keeps track of the state of the A/C power (on / off)
 
 // ------------------- TIMERS -----------------------
 long switchConfirmTimer;
@@ -44,22 +48,21 @@ long mainTimer;
  */
 void playBuzzer()
 {
-  if (powerAC)
-  {
-    int size = sizeof(susMogiusgtusMelody) / sizeof(int); // Get the length of your array/melody
+  int randomNumber = random(4);  // Random number 0 to 3
 
-    if (random(1, 4) == 3)
-    { // 1/20 chance that rere mogustgistus plays
+  if (randomNumber == 0) { // 1/3 chance that Stereo Love plays
+      int size = sizeof(stereoLoveMelody) / sizeof(int);
+      playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
+  }
+  else {  // Play amongus
+    if (random(1, 20) == 1) {   // 1/20 change that rere plays
+      int size = sizeof(susMogiusgtusMelody) / sizeof(int);
       playSong(BUZZER, rereSusMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
     }
-    else
-    {
+    else {
+      int size = sizeof(susMogiusgtusMelody) / sizeof(int);
       playSong(BUZZER, susMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
     }
-  }
-  else
-  {
-    noTone(BUZZER);
   }
 }
 
@@ -71,22 +74,25 @@ void playBuzzer()
  */
 void timerStateMachine()
 {
-  // Serial.print("timerState: ");
-  // Serial.print(timerACState);
-  // Serial.print(" | timerAC: ");
-  // Serial.print(millis() - timerAC);
-  // Serial.println("");
-
   switch (timerACState)
   {
   case IDLE:
     timerAC = millis();
-    timerACState = AC_ON;
+    timerACState = AC_ON_SHORT;
     digitalWrite(AC_RELAY_PIN, HIGH);
     break;
 
-  case AC_ON:
-    if (millis() - timerAC > ONE_MINUTE)
+  case AC_ON_SHORT:
+    if (millis() - timerAC > ONE_MINUTE * AC_ON_TIME_SHORT)
+    {
+      timerACState = AC_OFF;
+      digitalWrite(AC_RELAY_PIN, LOW);
+      timerAC = millis();
+    }
+    break;
+
+  case AC_ON_LONG:
+    if (millis() - timerAC > ONE_MINUTE * AC_ON_TIME_LONG)
     {
       timerACState = AC_OFF;
       digitalWrite(AC_RELAY_PIN, LOW);
@@ -95,9 +101,13 @@ void timerStateMachine()
     break;
 
   case AC_OFF:
-    if (millis() - timerAC > ONE_MINUTE * 3)
-    {
-      timerACState = AC_ON;
+    if (millis() - timerAC > ONE_MINUTE * AC_OFF_TIME && switchAC) {
+      timerACState = AC_ON_SHORT;
+      digitalWrite(AC_RELAY_PIN, HIGH);
+      timerAC = millis();
+    }
+    else if (millis() - timerAC > ONE_MINUTE * AC_OFF_TIME && !switchAC) {
+      timerACState = AC_ON_LONG;
       digitalWrite(AC_RELAY_PIN, HIGH);
       timerAC = millis();
     }
@@ -115,7 +125,7 @@ void stateMachineAC(bool switchReadingAC)
   switch (stateAC)
   {
   case IDLE:
-    if (switchReadingAC != powerAC)
+    if (switchReadingAC != switchAC)
     {
       stateAC = SWITCH_CONFIRM; // need to confirm that switch reading is actually a flip and not just noise
       switchConfirmTimer = millis();
@@ -125,7 +135,7 @@ void stateMachineAC(bool switchReadingAC)
   case SWITCH_CONFIRM:
     if (millis() - switchConfirmTimer > ONE_SECOND * 0.5)
     { // wait for half a second in order to ignore noise in signal
-      if (switchReadingAC != powerAC)
+      if (switchReadingAC != switchAC)
       {
         stateAC = SWITCH_CHANGE; // if after 0.5 seconds the switch is still fliped, then its confirmed
       }
@@ -137,7 +147,7 @@ void stateMachineAC(bool switchReadingAC)
     break;
 
   case SWITCH_CHANGE:
-    powerAC = !powerAC;
+    switchAC = !switchAC;
     playBuzzer();
     stateAC = IDLE;
     break;
@@ -174,7 +184,7 @@ void setup()
  */
 void loop()
 {
-  bool carPower = digitalRead(CAR_POWER_PIN);
+  bool carPower = 1; //digitalRead(CAR_POWER_PIN);
 
   switch (carState)
   {
@@ -184,16 +194,7 @@ void loop()
 
   case CAR_ON:
     stateMachineAC(digitalRead(AC_POWER_SWITCH_PIN));
-
-    if (powerAC)
-    {
-      timerStateMachine();
-    }
-    else
-    {
-      timerACState = IDLE;
-      digitalWrite(AC_RELAY_PIN, LOW);
-    }
+    timerStateMachine();
 
     if (carPower == CAR_OFF)
     {
@@ -204,18 +205,16 @@ void loop()
   case CLEANUP:
     digitalWrite(AC_RELAY_PIN, LOW);
     carState = CAR_OFF;
-    powerAC = false;
+    switchAC = false;
     break;
   }
-  while (millis() - mainTimer < LOOP_TIME)
-  {
-  }
+
   Serial.print("AC STATE: ");
   Serial.print(stateAC);
   Serial.print(" | AC SWITCH READING: ");
   Serial.print(digitalRead(AC_POWER_SWITCH_PIN));
-  Serial.print(" | powerAC bool: ");
-  Serial.print(powerAC);
+  Serial.print(" | switchAC bool: ");
+  Serial.print(switchAC);
   Serial.print(" | CarState: ");
   Serial.print(carState);
   Serial.println("");
