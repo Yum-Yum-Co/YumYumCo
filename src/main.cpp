@@ -57,7 +57,7 @@ void playBuzzer()
   switch (songSelection)
   {
     case MOGUSTGUTUS:
-      int size = sizeof(susMogiusgtusMelody) / sizeof(int);
+      size = sizeof(susMogiusgtusMelody) / sizeof(int);
       melody = susMogiusgtusMelody;
       rhythm = susMogiusgtusRhythm;
       bpm = susMogiusgtusBPM;
@@ -72,21 +72,19 @@ void playBuzzer()
       // }
       break;
     
-    case STEREO_LOVE:
-        int size = sizeof(stereoLoveBPM) / sizeof(int);
-        playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
-      break;
+    // case STEREO_LOVE:
+    //     int size = sizeof(stereoLoveBPM) / sizeof(int);
+    //     playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
+    //   break;
 
-    case BETTER_OFF_ALONE:
-        int size = sizeof(betterOffAloneMelody) / sizeof(int);
-        playSong(BUZZER, betterOffAloneMelody, betterOffAloneRhythm, size, betterOffAloneBPM);
-      break;
-
-    default:
-      break;
+    // case BETTER_OFF_ALONE:
+    //     int size = sizeof(betterOffAloneMelody) / sizeof(int);
+    //     playSong(BUZZER, betterOffAloneMelody, betterOffAloneRhythm, size, betterOffAloneBPM);
+    //   break;
   }
-
   playSong(BUZZER, melody, rhythm, size, bpm);
+
+  
 }
 
 // ---------------------- STATE MACHINES ---------------------------
