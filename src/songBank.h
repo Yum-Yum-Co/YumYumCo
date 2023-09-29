@@ -20,10 +20,10 @@ int susMogiusgtusRhythm[] = {
     8,
     8, 4};
 
-int stereoLoveBPM = 60;
+int stereoLoveBPM = 40;
 int stereoLoveMelody[] = {
     GS4, PAUSE, E5, PAUSE, E5, DS5, E5, FS5, E5,
     DS5, E5, CS5, DS5, B4, CS5, A4, B4, GS4};
-int stereoLoveRythm[] = {
+int stereoLoveRhythm[] = {
     8, 16, 6, 16, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 2};
