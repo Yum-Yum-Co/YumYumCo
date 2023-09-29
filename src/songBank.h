@@ -13,7 +13,7 @@ int rereSusMogiusgtusMelody[] = {
     AS3, B4, C4,
     PAUSE,
     G1, C2};
-int susMogiusgtusRhythm[] = {
+float susMogiusgtusRhythm[] = {
     8, 8, 8, 8,
     8, 8, 4, 8,
     16, 16, 4,
@@ -24,6 +24,22 @@ int stereoLoveBPM = 40;
 int stereoLoveMelody[] = {
     GS4, PAUSE, E5, PAUSE, E5, DS5, E5, FS5, E5,
     DS5, E5, CS5, DS5, B4, CS5, A4, B4, GS4};
-int stereoLoveRhythm[] = {
+float stereoLoveRhythm[] = {
     8, 16, 6, 16, 8, 8, 8, 8, 8,
     8, 8, 8, 8, 8, 8, 8, 8, 2};
+
+int betterOffAloneBPM = 46;
+int betterOffAloneMelody[] = {
+    B5, B5, GS5, B5, B5, AS5,
+    FS5, FS6, FS6, DS6,
+    B5, B5, GS5, B5, B5, AS5,
+    FS5, E6, E6, DS6,
+    B5,
+};
+float betterOffAloneRhythm[] = {
+    4, 8, 4, 4, 4, 4,
+    8, 5.33, 5.33, 8,
+    4, 8, 4, 4, 4, 4,
+    8, 5.33, 5.33, 8,
+    4,
+};

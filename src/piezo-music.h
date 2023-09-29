@@ -89,12 +89,12 @@
 #define D8 4699
 #define DS8 4978
 
-void playSong(int pin, int melody[], int rythm[], int size, int tempo)
+void playSong(int pin, int melody[], float rythm[], int size, int tempo)
 {
     int tempoMillis = 60000 / tempo;
     for (int thisNote = 0; thisNote < size; thisNote++)
     {
-        int noteDuration = tempoMillis / rythm[thisNote];
+        float noteDuration = tempoMillis / rythm[thisNote];
         tone(pin, melody[thisNote], noteDuration);
         int pauseBetweenNotes = noteDuration * 1.30;
         delay(pauseBetweenNotes);

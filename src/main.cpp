@@ -51,8 +51,10 @@ void playBuzzer()
   int randomNumber = random(4);  // Random number 0 to 3
 
   if (randomNumber == 0) { // 1/3 chance that Stereo Love plays
-      int size = sizeof(stereoLoveMelody) / sizeof(int);
-      playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
+      int size = sizeof(betterOffAloneMelody) / sizeof(int);
+      playSong(BUZZER, betterOffAloneMelody, betterOffAloneRhythm, size, betterOffAloneBPM);
+      //int size = sizeof(stereoLoveMelody) / sizeof(int);
+      //playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
   }
   else {  // Play amongus
     if (random(1, 20) == 1) {   // 1/20 change that rere plays
