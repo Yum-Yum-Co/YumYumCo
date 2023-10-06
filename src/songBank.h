@@ -27,7 +27,7 @@ float susMogiusgtusRhythm[] = {
     8, 4};
 
 
-int stereoLoveBPM = 40;
+int stereoLoveBPM = 43;
 int stereoLoveMelody[] = {
     GS4, PAUSE, E5, PAUSE, E5, DS5, E5, FS5, E5,
     DS5, E5, CS5, DS5, B4, CS5, A4, B4, GS4};
@@ -36,7 +36,7 @@ float stereoLoveRhythm[] = {
     8, 8, 8, 8, 8, 8, 8, 8, 2};
 
 
-int betterOffAloneBPM = 46;
+int betterOffAloneBPM = 48;
 int betterOffAloneMelody[] = {
     B5, B5, GS5, B5, B5, AS5,
     FS5, FS6, FS6, DS6,

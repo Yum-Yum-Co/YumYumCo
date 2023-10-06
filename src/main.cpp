@@ -4,7 +4,7 @@
 // -------------------- PINS -----------------
 #define CAR_POWER_PIN 12
 #define AC_POWER_SWITCH_PIN 5
-#define BUZZER 3
+#define BUZZER 9
 #define AC_RELAY_PIN 13
 
 // ------------------ STATE CONSTANTS -----------------
@@ -22,16 +22,16 @@
 // ----------------- CONSTANTS --------------------
 #define LOOP_TIME 0
 #define ONE_SECOND 1000
-#define ONE_MINUTE 60000    // 60,000 milliseconds = one minute
-#define AC_ON_TIME_SHORT 3.5  // On time (minutes)
-#define AC_ON_TIME_LONG 7.5 // On time (minutes)
-#define AC_OFF_TIME 0.5     // Off time (minutes)
+#define ONE_MINUTE 60000      // 60,000 milliseconds = one minute
+#define AC_ON_TIME_SHORT 2.5  // On time (minutes)
+#define AC_ON_TIME_LONG 7.5   // On time (minutes)
+#define AC_OFF_TIME 0.5       // Off time (minutes)
 
 // ------------------ STATE VARIABLES ----------------
 int carState;     // the state of the Car's power
 int stateAC;      // the state of the AC State Machine
 int timerACState; // the state of the AC Timer State Machine
-bool switchAC;     // keeps track of the state of the A/C power (on / off)
+bool switchAC;    // keeps track of the state of the A/C control switch (on / off)
 
 // ------------------- TIMERS -----------------------
 long switchConfirmTimer;
@@ -39,6 +39,25 @@ long timerAC;
 long mainTimer;
 
 // --------------------- HELPER FUNCTIONS -------------------------
+/**
+ * @brief Add to the end of loop function for debugging.
+ *        Remove during installation so TX LED doesn't draw power.
+ */
+void printToSerial()
+{
+  Serial.print("SWITCH STATE MACHINE: ");
+  Serial.print(stateAC);
+  Serial.print(" | SWITCH (PULLDOWN): ");
+  Serial.print(digitalRead(AC_POWER_SWITCH_PIN));
+  Serial.print(" | switchAC bool: ");
+  Serial.print(switchAC);
+  Serial.print(" | CarState: ");
+  Serial.print(carState);
+  Serial.print(" | timerACState: ");
+  Serial.print(timerACState);
+  Serial.println("");
+  mainTimer = millis();
+}
 
 /**
  * @brief Controls the logic for playing music on the Buzzer.
@@ -48,7 +67,9 @@ long mainTimer;
  */
 void playBuzzer()
 {
-  int songSelection = 0;//random(4);  // Random number 0 to 3
+  randomSeed(millis());
+  int songSelection = random(3);  // Random number 0 to 2
+  int mogustusRere = random(1,10);  // 1/10 chance that rere plays
   int* melody;
   float* rhythm;
   int bpm;
@@ -58,40 +79,41 @@ void playBuzzer()
   {
     case MOGUSTGUTUS:
       size = sizeof(susMogiusgtusMelody) / sizeof(int);
-      melody = susMogiusgtusMelody;
       rhythm = susMogiusgtusRhythm;
       bpm = susMogiusgtusBPM;
-      // int mogustusRere = random(1,20) == 1;  // 1/20 change that rere plays
-      // if (mogustusRere) {
-      //   int size = sizeof(susMogiusgtusMelody) / sizeof(int);
-      //   playSong(BUZZER, rereSusMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
-      // }
-      // else {
-      //   int size = sizeof(susMogiusgtusMelody) / sizeof(int);
-      //   playSong(BUZZER, susMogiusgtusMelody, susMogiusgtusRhythm, size, susMogiusgtusBPM);
-      // }
+      
+      if (mogustusRere) {
+        melody = rereSusMogiusgtusMelody;
+      }
+      else {
+        melody = susMogiusgtusMelody;
+      }
       break;
     
-    // case STEREO_LOVE:
-    //     int size = sizeof(stereoLoveBPM) / sizeof(int);
-    //     playSong(BUZZER, stereoLoveMelody, stereoLoveRhythm, size, stereoLoveBPM);
-    //   break;
+    case STEREO_LOVE:
+      size = sizeof(stereoLoveMelody) / sizeof(int);
+      melody = stereoLoveMelody;
+      rhythm = stereoLoveRhythm;
+      bpm = stereoLoveBPM;
+      break;
 
-    // case BETTER_OFF_ALONE:
-    //     int size = sizeof(betterOffAloneMelody) / sizeof(int);
-    //     playSong(BUZZER, betterOffAloneMelody, betterOffAloneRhythm, size, betterOffAloneBPM);
-    //   break;
+    case BETTER_OFF_ALONE:
+      size = sizeof(betterOffAloneMelody) / sizeof(int);
+      melody = betterOffAloneMelody;
+      rhythm = betterOffAloneRhythm;
+      bpm = betterOffAloneBPM;
+      break;
+
   }
   playSong(BUZZER, melody, rhythm, size, bpm);
-
-  
 }
 
 // ---------------------- STATE MACHINES ---------------------------
 
 /**
  * @brief State machine for the timer controlling the air conditioning.
- *        AC turns on for one minute and then turns off for 3 minutes.
+ *        AC turns on for AC_ON_TIME_SHORT or AC_ON_TIME_LONG depending on switch state,
+ *        then turns off for AC_OFF_TIME.
  */
 void timerStateMachine()
 {
@@ -99,42 +121,42 @@ void timerStateMachine()
   {
   case IDLE:
     timerAC = millis();
-    timerACState = AC_ON_SHORT;
+    timerACState = AC_ON_LONG;
     digitalWrite(AC_RELAY_PIN, HIGH);
     break;
 
   case AC_ON_SHORT:
+    digitalWrite(AC_RELAY_PIN, HIGH);
     if (millis() - timerAC > ONE_MINUTE * AC_ON_TIME_SHORT)
     {
       timerACState = AC_OFF;
-      digitalWrite(AC_RELAY_PIN, LOW);
       timerAC = millis();
     }
     break;
 
   case AC_ON_LONG:
+    digitalWrite(AC_RELAY_PIN, HIGH);
     if (millis() - timerAC > ONE_MINUTE * AC_ON_TIME_LONG)
     {
       timerACState = AC_OFF;
-      digitalWrite(AC_RELAY_PIN, LOW);
       timerAC = millis();
     }
     break;
 
   case AC_OFF:
-    if (millis() - timerAC > ONE_MINUTE * AC_OFF_TIME && switchAC) {
+    digitalWrite(AC_RELAY_PIN, LOW);
+    if ((millis() - timerAC > ONE_MINUTE * AC_OFF_TIME) && switchAC) {
       timerACState = AC_ON_SHORT;
-      digitalWrite(AC_RELAY_PIN, HIGH);
       timerAC = millis();
     }
-    else if (millis() - timerAC > ONE_MINUTE * AC_OFF_TIME && !switchAC) {
+    else if ((millis() - timerAC > ONE_MINUTE * AC_OFF_TIME) && !switchAC) {
       timerACState = AC_ON_LONG;
-      digitalWrite(AC_RELAY_PIN, HIGH);
       timerAC = millis();
     }
     break;
   }
 }
+
 
 /**
  * @brief The state machine for the AC power switch. Controls the logic surrounding on/off functions for the AC system
@@ -190,8 +212,6 @@ void setup()
   pinMode(BUZZER, OUTPUT);
   pinMode(AC_RELAY_PIN, OUTPUT);
 
-  //digitalWrite(AC_RELAY_PIN, digitalRead(AC_POWER_SWITCH_PIN));   // sets relay to original power mode when car starts up
-
   stateAC = IDLE;
   timerACState = IDLE;
   carState = digitalRead(CAR_POWER_PIN);
@@ -205,7 +225,8 @@ void setup()
  */
 void loop()
 {
-  bool carPower = 1; //digitalRead(CAR_POWER_PIN);
+  digitalWrite(LED_BUILTIN, LOW); // Doesn't work in setup for some reason
+  bool carPower = digitalRead(CAR_POWER_PIN);
 
   switch (carState)
   {
@@ -224,20 +245,11 @@ void loop()
     break;
 
   case CLEANUP:
+    delay(250);   // So you can hear the relay click after car turns off
     digitalWrite(AC_RELAY_PIN, LOW);
     carState = CAR_OFF;
     switchAC = false;
+    timerACState = IDLE;
     break;
   }
-
-  Serial.print("AC STATE: ");
-  Serial.print(stateAC);
-  Serial.print(" | AC SWITCH READING: ");
-  Serial.print(digitalRead(AC_POWER_SWITCH_PIN));
-  Serial.print(" | switchAC bool: ");
-  Serial.print(switchAC);
-  Serial.print(" | CarState: ");
-  Serial.print(carState);
-  Serial.println("");
-  mainTimer = millis();
 }

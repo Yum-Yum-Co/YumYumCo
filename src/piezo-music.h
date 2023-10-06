@@ -92,6 +92,7 @@
 void playSong(int pin, int melody[], float rythm[], int size, int tempo)
 {
     int tempoMillis = 60000 / tempo;
+    //int timer = millis();
     for (int thisNote = 0; thisNote < size; thisNote++)
     {
         float noteDuration = tempoMillis / rythm[thisNote];
@@ -99,5 +100,11 @@ void playSong(int pin, int melody[], float rythm[], int size, int tempo)
         int pauseBetweenNotes = noteDuration * 1.30;
         delay(pauseBetweenNotes);
         noTone(pin);
+        /*
+        if (millis() - timer > pauseBetweenNotes) {
+            timer = millis();
+            noTone(pin);
+        }
+        */
     }
 }
